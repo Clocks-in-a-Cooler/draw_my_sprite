@@ -1,8 +1,8 @@
 function create_drawing_canvas(width, height) {
     var canvas = document.createElement("canvas");
     
-    canvas.width = width * 25;
-    canvas.height = height * 25;
+    canvas.width = width * 200;
+    canvas.height = height * 200;
     
     canvas.className += "drawing-canvas";
     
@@ -19,15 +19,15 @@ function draw_sprite(width, height, update) {
     var drawing_wrapper  = document.getElementById("drawing-wrapper");
     var drawing_controls = document.getElementById("drawing-controls");
     
-    drawing_wrapper.style.width  = (width * 25) + 100 + 12 + "px";
-    drawing_wrapper.style.height = (height * 25) + 50 + 2 + "px";
+    drawing_wrapper.style.width  = (width * 200) + 100 + 12 + "px";
+    drawing_wrapper.style.height = (height * 200) + 50 + 2 + "px";
     
     drawing_wrapper.appendChild(canvas); drawing_controls.appendChild(done_button);
     drawing_wrapper.style.visibility = "visible";
     
     context = canvas.getContext("2d");
     
-    context.lineWidth   = 3;
+    context.lineWidth   = 5;
     context.strokeStyle = "black";
     
     canvas.addEventListener("mousedown", mousedown);
@@ -51,8 +51,8 @@ var mouse_is_down = false;
 var mouse_pos     = { x: null, y: null };
 
 var context = null;
-var tool = "pencil";
-var size = 3;
+var tool    = "pencil";
+var size    = 5;
 
 function mousedown(evt) {
     mouse_is_down = true;
@@ -65,7 +65,10 @@ function mousemove(evt) {
     }
     
     if (tool == "pencil") {
+        context.beginPath();
         context.arc(mouse_pos.x, mouse_pos.y, size / 2, 0, Math.PI * 2);
+        context.closePath();
+        context.fill();
         context.beginPath();
         context.moveTo(mouse_pos.x, mouse_pos.y);
         context.lineTo(evt.offsetX, evt.offsetY);
