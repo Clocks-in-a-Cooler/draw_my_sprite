@@ -1,5 +1,3 @@
-// PLEASE KEEP IN MIND THAT I HAVE NO IDEA WHETHER ANY OF THIS WILL ACTUALLY WORK -- IT PROBABLY WON'T!!!
-
 function create_sprite(url) {
     var elt = document.createElement("img");
     elt.src = url;
@@ -70,8 +68,8 @@ var viewport = {
     
     draw: function() {
         // determine what to draw, where
-        var left = Math.min(this.x), right  = Math.max(this.x + this.width);
-        var top  = Math.min(this.y), bottom = Math.max(this.y + this.height);
+        var left = Math.floor(this.x), right  = Math.ceil(this.x + this.width);
+        var top  = Math.floor(this.y), bottom = Math.ceil(this.y + this.height);
         
         // get the actors that are currently in view
         var actors_in_view = current_level.actors.filter((a) => {

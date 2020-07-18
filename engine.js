@@ -14,8 +14,22 @@ function resume_game() {
     
 }
 
+var last_time = null;
 function cycle(time) {
+    var lapse;
+    if (last_time == null) {
+        lapse = 0;
+    } else {
+        lapse = time - last_time;
+    }
+    last_time = time;
     
+    current_level.update(lapse);
+    
+    viewport.update();
+    viewport.draw();
+    
+    requestAnimationFrame(cycle);
 }
 
 // level loading and other stuff
@@ -74,5 +88,11 @@ function init() {
                 keys.action = false;
                 break;
         }
-    })
+    });
+}
+
+function debug() {
+    init();
+    current_level = new Level(test_level);
+    requestAnimationFrame(cycle);
 }
