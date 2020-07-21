@@ -4,17 +4,107 @@
         <title>Level Editor</title>
         <meta charset="utf-8" />
         <style>
+            html, body {
+                position: absolute;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                margin: 0; border: 0; padding: 0;
+                font-family: "Arial", "Helvetica", sans-serif;
+                font-size: 13pt;
+            }
             
+            #editor-wrapper {
+                width: 664px; height: 552px;
+                /* so much work just to center a div on a screen
+                   you'd think that the w3c would at least provide a
+                   "position: center" option or something like that
+                */
+                position: absolute;
+                top: 0; left: 0; bottom: 0; right: 0;
+                margin: auto;
+            }
+            
+            #editor-controls {
+                width: 100px; /* height: 550px; */
+                display: inline-block;
+                border: 1px solid teal;
+                margin: 0;
+                top: 0; left: 0;
+                position: absolute;
+            }
+            
+            #add-remove {
+                border-bottom: 1px solid teal;
+            }
+            
+            #display-wrapper {
+                width: 550px; height: 550px;
+                display: inline-block;
+                border: 1px solid dodgerblue;
+                padding: 0;
+                position: absolute;
+                left: 104px;
+            }
+            
+            #display {
+                width: 550px; height: 550px;
+                background-color: dodgerblue;
+                margin: 0; border: 0;
+            }
+            
+            button {
+                width: 90%;
+                margin-left: 4%;
+                max-width: 90%;
+                color: midnightblue;
+                border: 1px solid midnightblue;
+                background-color: white;
+                transition: background-color 0.5s, color 0.5s;
+                margin-top: 3px;
+                margin-bottom: 3px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+            }
+            
+            button:hover {
+                background-color: midnightblue;
+                color: white;
+                transition: background-color 0.5s, color 0.5s;
+            }
+            
+            button#test_level, button#export {
+                color: forestgreen;
+                background-color: white;
+                border-color: forestgreen;
+            }
+            
+            button#test_level:hover, button#export:hover {
+                color: white;
+                background-color: forestgreen;
+            }
         </style>
     </head>
     <body>
+        <!-- more divsoup! wheeeeeeeeeee! -->
         <div id="editor-wrapper">
             <div id="editor-controls">
-                
+                <div id="add-remove">
+                    <button id="add_wall">wall</button>
+                    <button id="add_trap">trap</button>
+                    <button id="add_coin">coin</button>
+                    <button id="add_goal">goal</button>
+                    <button id="add_player">player</button>
+                    <button id="remove">erase</button>
+                </div>
+                <button id="test_level">test</button>
+                <button id="export">export</button>
             </div>
-            <div id="main-wrapper">
-                
+            <div id="display-wrapper">
+                <canvas id="display"><canvas>
             </div>
         </div>
+        <script>
+            // too lazy to put the script in a separate file
+        </script>
     </body>
 </html>

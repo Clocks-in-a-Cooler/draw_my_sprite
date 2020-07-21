@@ -8,7 +8,7 @@ function create_sprite(url) {
 var sprites = {
     // to be drawn by the player
     // remember that all of the drawn sprites must be scaled down
-    // by a factor of 10
+    // by a factor of 6.67
     "wall": create_sprite("blank.png"),
     "coin": create_sprite("blank.png"),
     "goal": create_sprite("blank.png"),
@@ -28,13 +28,13 @@ var sprites = {
 };
 
 // drawing on the game canvas
-var display = document.getElementById("game-display");
-var context = display.getContext("2d");
+var display         = document.getElementById("game-display");
+var display_context = display.getContext("2d");
 
 display.width = 550; display.height = 550;
 
-var scale                 = 20;
-var sprite_scaling_factor = 0.1; // not sure if this will actually be used
+var scale                 = 30;
+var sprite_scaling_factor = 3 / 20; // not sure if this will actually be used
 
 var background_colour = "powderblue"; // trusty old colour
 
@@ -50,19 +50,19 @@ var viewport = {
         var top_margin = this.y + (this.height / 3), bottom_margin = top_margin + (this.height / 3);
         
         // figure where to scroll
-        if (player.x < left_margin) {
+        if (player.pos.x < left_margin) {
             // scroll left
-            this.x -= left_margin - player.x;
-        } else if (player.x > right_margin) {
+            this.x -= left_margin - player.pos.x;
+        } else if (player.pos.x > right_margin) {
             // scroll right
-            this.x += player.x - right_margin;
+            this.x += player.pos.x - right_margin;
         }
         
         // scroll up, down, you get the drill
-        if (player.y < top_margin) {
-            this.y -= top_margin - player.y;
+        if (player.pos.y < top_margin) {
+            this.y -= top_margin - player.pos.y;
         } else if (player.y > bottom_margin) {
-            this.y += player.y - bottom_margin;
+            this.y += player.pos.y - bottom_margin;
         }
     },
     
@@ -83,8 +83,8 @@ var viewport = {
         top  = Math.max(top, 0), bottom = Math.max(current_level.height, bottom);
         
         // draw the background colour -- DUH
-        context.fillStyle = background_colour;
-        context.fillRect(0, 0, display.width, display.height);
+        display_context.fillStyle = background_colour;
+        display_context.fillRect(0, 0, display.width, display.height);
         
         // draw the static stuff -- walls, traps, blank spaces
         for (var y = top; y < bottom; y++) {
@@ -97,13 +97,13 @@ var viewport = {
                 var screen_y = (y - this.y) * scale;
                 switch (tile) {
                     case "wall":
-                        context.drawImage(sprites.wall, screen_x, screen_y, 20, 20);
+                        display_context.drawImage(sprites.wall, screen_x, screen_y, scale, scale);
                         break;
                     case "u-trap":
                     case "d-trap":
                     case "l-trap":
                     case "r-trap":
-                        context.drawImage(sprites.trap, screen_x, screen_y, 20, 20);
+                        display_context.drawImage(sprites.trap, screen_x, screen_y, scale, scale);
                         break;
                 }
             }
@@ -116,7 +116,7 @@ var viewport = {
             if (a.type == "player") { // cue korobeiniki
                 // for later: draw the player's sprite reversed if the player is moving left (motion.x < 0)
             } */
-            context.drawImage(sprites[a.type], screen_x, screen_y, a.size.x * scale, a.size.y * scale);
+            display_context.drawImage(sprites[a.type], screen_x, screen_y, a.size.x * scale, a.size.y * scale);
         });
     },
 };
