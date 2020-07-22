@@ -31,6 +31,7 @@
                 margin: 0;
                 top: 0; left: 0;
                 position: absolute;
+                border-radius: 5px;
             }
             
             #add-remove {
@@ -44,6 +45,7 @@
                 padding: 0;
                 position: absolute;
                 left: 104px;
+                border-radius: 5px;
             }
             
             #display {
@@ -64,6 +66,7 @@
                 margin-bottom: 3px;
                 padding-top: 3px;
                 padding-bottom: 3px;
+                border-radius: 20px;
             }
             
             button:hover {
@@ -72,10 +75,24 @@
                 transition: background-color 0.5s, color 0.5s;
             }
             
+            button:disabled {
+                background-color: white;
+                color: dimgray;
+                border-color: dimgray;
+                transition: background-color 0.5s, color 0.5s;
+            }
+            
             button#test_level, button#export {
                 color: forestgreen;
                 background-color: white;
                 border-color: forestgreen;
+            }
+            
+            button.selected {
+                background-color: black;
+                color: white;
+                border-color: black;
+                transition: background-color 0.5s, color 0.5s'
             }
             
             button#test_level:hover, button#export:hover {
@@ -89,7 +106,7 @@
         <div id="editor-wrapper">
             <div id="editor-controls">
                 <div id="add-remove">
-                    <button id="add_wall">wall</button>
+                    <button id="add_wall" class="selected">wall</button>
                     <button id="add_trap">trap</button>
                     <button id="add_coin">coin</button>
                     <button id="add_goal">goal</button>
@@ -105,6 +122,190 @@
         </div>
         <script>
             // too lazy to put the script in a separate file
+            // enjoy your huge script inside an HTML tree
+            
+            // things required for this:
+            // [ ] click to place/erase (depending on the tool selected)
+            // [ ] move the mouse near the edges to navigate
+            // [ ] test the level by launching a separate window
+            // [ ] export the level as code so the Level constructor can use it
+            
+            var click_action = "add_wall";
+            // create the rbutton group
+            (function(parent, callback) {
+                var buttons = parent.childNodes;
+                buttons.forEach(b => {
+                    b.addEventListener("click", () => {
+                        buttons.forEach(u => {
+                            // don't you love nesting functions inside functions inside functions?
+                            u.className = "";
+                        });
+                        b.className = "selected";
+                        callback(b.id);
+                    });
+                });
+            })(document.getElementById("add-remove"), (data) => { click_action = data; });
+            
+            var map = {
+                width: Number(prompt("how many columns?", 50)),
+                height: Number(prompt("how many rows?", 30)),
+                tiles: [],
+            };
+            
+            for (var h = 0; h < map.height; h++) {
+                map.tiles[h] = Array(map.width).fill(null);
+            }
+            
+            var canvas   = document.querySelector("canvas");
+            var context  = canvas.getContext("2d");
+            canvas.width = 550, canvas.height = 550;
+            
+            var mouse_pos = { x: null, y: null };
+            var clicking  = false;
+            
+            canvas.addEventListener("mousemove", (evt) => {
+                mouse_pos.x = evt.offsetX, mouse_pos.y = evt.offsetY;
+            });
+            
+            canvas.addEventListener("mousedown", (evt) => {
+                clicking = true;
+            });
+            
+            canvas.addEventListener("mouseup", (evt) => {
+                clicking = false;
+            });
+            
+            // colours!
+            var wall_colour   = "white";
+            var trap_colour   = "indianred";
+            var goal_colour   = "mediumspringgreen";
+            var coin_colour   = "yellow";
+            var player_colour = "forestgreen";
+            
+            var scale = 30;
+            
+            var viewport = {
+                scale: scale,
+                top: 0, left: 0,
+                width: canvas.width / this.scale, height: canvas.height / this.scale,
+                
+                update: function() {
+                    var left_margin = this.left + this.width * 0.1, right_margin  = this.left + this.width * 0.9;
+                    var top_margin  = this.top + this.height * 0.1, bottom_margin = this.top + this.height * 0.9;
+                    
+                    var mouse = this.get_map_coords();
+                    
+                    var scrolling_factor = 0.0005;
+                    
+                    if (mouse.x < left_margin) {
+                        this.left += (left_margin - mouse_pos.x) * scrolling_factor * 10;
+                    }
+                    if (mouse.x > right_margin) {
+                        this.left += (mouse_pos.x - right_margin) * scrolling_factor;
+                    }
+                    
+                    if (mouse.y < top_margin) {
+                        this.top += (top_margin - mouse_pos.y) * scrolling_factor * 10;
+                    }
+                    if (mouse.y > bottom_margin) {
+                        this.top += (mouse_pos.y - bottom_margin) * scrolling_factor;
+                    }
+                    
+                    this.left = Math.min(map.width - this.width, Math.max(this.left, 0));
+                    this.top  = Math.min(map.height - this.height, Math.max(this.top, 0));
+                },
+                
+                draw: function() {
+                    // clear the screen first
+                    context.clearRect(0, 0, 550, 550);
+                    
+                    /*
+                    var start_x = Math.max(Math.min(map.width, Math.floor(this.left)), 0);
+                    var end_x   = Math.max(Math.min(map.width, Math.ceil(this.left + this.width)), 0);
+                    var start_y = Math.max(Math.min(map.height, Math.floor(this.top)), 0);
+                    var end_y   = Math.max(Math.min(map.height, Math.ceil(this.top + this.height)), 0);
+                    */
+                    
+                    var start_x = Math.floor(this.left);
+                    var end_x   = Math.ceil(this.left + this.width);
+                    var start_y = Math.floor(this.top);
+                    var end_y   = Math.ceil(this.top + this.height);
+                    
+                    for (var y = start_y; y < end_y; y++) {
+                        var gridline = map.tiles[y];
+                        if (gridline == null) continue;
+                        for (var x = start_x; x < end_x; x++) {
+                            if (gridline[x] == null) continue;
+                            var screen_x = (x - this.left) * this.scale, screen_y = (y - this.top) * this.scale;
+                            switch (gridline[x]) {
+                                case "wall":
+                                    context.fillStyle = wall_colour;
+                                    break;
+                                case "u-trap":
+                                    context.fillStyle = trap_colour;
+                            }
+                            
+                            context.fillRect(screen_x, screen_y, this.scale, this.scale);
+                        }
+                    }
+                },
+                
+                get_map_coords: function() {
+                    return {
+                        x: Math.floor(mouse_pos.x / this.scale + this.left),
+                        y: Math.floor(mouse_pos.y / this.scale + this.top),
+                    };
+                },
+            };
+            
+            function animate() {
+                viewport.update();
+                
+                if (clicking) place();
+                
+                viewport.draw();
+                
+                requestAnimationFrame(animate);
+            }
+            
+            function place() {
+                var mouse = viewport.get_map_coords();
+                if (mouse.x >= 0 && mouse.x < map.width &&
+                    mouse.y >= 0 && mouse.y < map.height
+                ) {
+                    map.tiles[mouse.y][mouse.x] = (function() {
+                        switch (click_action) {
+                            case "add_wall":
+                                return "wall";
+                            case "add_trap":
+                                return "u-trap";
+                            case "remove":
+                                return null;
+                            default:
+                                return "wall";
+                        }
+                    })();
+                }
+            }
+            
+            document.getElementById("export").addEventListener("click", function() {
+                alert("look in the console.");
+                var lines = map.tiles.map(l => {
+                    return l.map(t => {
+                        switch(t) {
+                            case null:
+                                return " ";
+                            case "wall":
+                                return "#";
+                            case "u-trap":
+                                return "^";
+                        }
+                    }).join("");
+                });
+                console.log("[\"" + lines.join("\",\n\"") + "\"]");
+            });
+            
+            requestAnimationFrame(animate);
         </script>
     </body>
 </html>
