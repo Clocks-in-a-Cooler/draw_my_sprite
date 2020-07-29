@@ -6,6 +6,7 @@ function conversation(messages, after) {
     
     var continue_button       = document.createElement("button");
     continue_button.innerHTML = "...";
+    continue_button.className = "continue-conversation";
     
     var index = 0;
     

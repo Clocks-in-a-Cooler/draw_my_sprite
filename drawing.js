@@ -103,3 +103,5 @@ eraser_button.addEventListener("click", () => {
     eraser_button.className = "selected";
     tool = "eraser";
 });
+
+pencil_button.click();
