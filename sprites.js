@@ -61,7 +61,7 @@ var viewport = {
         // scroll up, down, you get the drill
         if (player.pos.y < top_margin) {
             this.y -= top_margin - player.pos.y;
-        } else if (player.y > bottom_margin) {
+        } else if (player.pos.y > bottom_margin) {
             this.y += player.pos.y - bottom_margin;
         }
     },
@@ -100,10 +100,28 @@ var viewport = {
                         display_context.drawImage(sprites.wall, screen_x, screen_y, scale, scale);
                         break;
                     case "u-trap":
-                    case "d-trap":
-                    case "l-trap":
-                    case "r-trap":
                         display_context.drawImage(sprites.trap, screen_x, screen_y, scale, scale);
+                        break;
+                    case "d-trap":
+                        display_context.save();
+                        display_context.translate(screen_x, screen_y);
+                        display_context.rotate(Math.PI);
+                        display_context.drawImage(sprites.trap, -scale, -scale, scale, scale);
+                        display_context.restore();
+                        break;
+                    case "l-trap":
+                        display_context.save();
+                        display_context.translate(screen_x, screen_y);
+                        display_context.rotate(3 * Math.PI / 2);
+                        display_context.drawImage(sprites.trap, -scale, 0, scale, scale);
+                        display_context.restore();
+                        break;
+                    case "r-trap":
+                        display_context.save();
+                        display_context.translate(screen_x, screen_y);
+                        display_context.rotate(Math.PI / 2);
+                        display_context.drawImage(sprites.trap, 0, -scale, scale, scale);
+                        display_context.restore();
                         break;
                 }
             }

@@ -92,12 +92,51 @@
                 background-color: black;
                 color: white;
                 border-color: black;
-                transition: background-color 0.5s, color 0.5s'
+                transition: background-color 0.5s, color 0.5s;
             }
             
             button#test_level:hover, button#export:hover {
                 color: white;
                 background-color: forestgreen;
+            }
+            
+            button#test_level:disabled {
+                color: dimgray;
+                background-color: white;
+                border-color: dimgray;
+                transition: background-color 0.5s, color 0.5s;
+            }
+            
+            button.close {
+                width: 90px;
+                color: firebrick;
+                background-color: white;
+                border-color: firebrick;
+            }
+            
+            button.close:hover {
+                color: white;
+                background-color: firebrick;
+            }
+            
+            .export-dialog {
+                width: 550px; height: 550px;
+                border: 1px solid black;
+                background-color: white;
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+                margin: auto;
+                z-index: 1;
+                overflow: hidden;
+            }
+            
+            .export-text {
+                width: 540px; height: 500px;
+                margin: 5px;
+                overflow-y: scroll;
+                overflow-x: wbr;
+                color: black;
+                font-family: monospace;
             }
         </style>
     </head>
@@ -126,9 +165,9 @@
             
             // things required for this:
             // [ ] click to place/erase (depending on the tool selected)
-            // [ ] move the mouse near the edges to navigate
+            // [x] move the mouse near the edges to navigate
             // [ ] test the level by launching a separate window
-            // [ ] export the level as code so the Level constructor can use it
+            // [x] export the level as code so the Level constructor can use it
             
             var click_action = "add_wall";
             // create the rbutton group
@@ -193,7 +232,10 @@
                     var left_margin = this.left + this.width * 0.1, right_margin  = this.left + this.width * 0.9;
                     var top_margin  = this.top + this.height * 0.1, bottom_margin = this.top + this.height * 0.9;
                     
-                    var mouse = this.get_map_coords();
+                    var mouse = {
+                        x: mouse_pos.x / this.scale + this.left,
+                        y: mouse_pos.y / this.scale + this.top,
+                    };
                     
                     var scrolling_factor = 0.0005;
                     
@@ -240,12 +282,61 @@
                             switch (gridline[x]) {
                                 case "wall":
                                     context.fillStyle = wall_colour;
+                                    context.fillRect(screen_x, screen_y, this.scale, this.scale);
                                     break;
                                 case "u-trap":
                                     context.fillStyle = trap_colour;
+                                    // draw a triangle, facing the same direction as the trap
+                                    context.beginPath();
+                                    context.moveTo(screen_x, screen_y + this.scale);
+                                    context.lineTo(screen_x + this.scale / 2, screen_y);
+                                    context.lineTo(screen_x + this.scale, screen_y + this.scale);
+                                    context.closePath();
+                                    context.fill();
+                                    break;
+                                case "d-trap":
+                                    context.fillStyle = trap_colour;
+                                    // draw a triangle, facing the same direction as the trap
+                                    context.beginPath();
+                                    context.moveTo(screen_x, screen_y);
+                                    context.lineTo(screen_x + this.scale / 2, screen_y + this.scale);
+                                    context.lineTo(screen_x + this.scale, screen_y);
+                                    context.closePath();
+                                    context.fill();
+                                    break;
+                                case "l-trap":
+                                    context.fillStyle = trap_colour;
+                                    // draw a triangle, facing the same direction as the trap
+                                    context.beginPath();
+                                    context.moveTo(screen_x, screen_y);
+                                    context.lineTo(screen_x + this.scale, screen_y + this.scale / 2);
+                                    context.lineTo(screen_x, screen_y + this.scale);
+                                    context.closePath();
+                                    context.fill();
+                                    break;
+                                case "r-trap":
+                                    context.fillStyle = trap_colour;
+                                    // draw a triangle, facing the same direction as the trap
+                                    context.beginPath();
+                                    context.moveTo(screen_x + this.scale, screen_y);
+                                    context.lineTo(screen_x, screen_y + this.scale / 2);
+                                    context.lineTo(screen_x + this.scale, screen_y + this.scale);
+                                    context.closePath();
+                                    context.fill();
+                                    break;
+                                case "coin":
+                                    context.fillStyle = coin_colour;
+                                    context.fillRect(screen_x + this.scale / 3, screen_y + this.scale / 3, this.scale / 3, this.scale / 3);
+                                    break;
+                                case "goal":
+                                    context.fillStyle = goal_colour;
+                                    context.fillRect(screen_x + this.scale / 4, screen_y + this.scale / 4, this.scale / 2, this.scale / 2);
+                                    break;
+                                case "player":
+                                    context.fillStyle = player_colour;
+                                    context.fillRect(screen_x, screen_y - this.scale, this.scale, this.scale * 2);
+                                    break;
                             }
-                            
-                            context.fillRect(screen_x, screen_y, this.scale, this.scale);
                         }
                     }
                 },
@@ -273,37 +364,143 @@
                 if (mouse.x >= 0 && mouse.x < map.width &&
                     mouse.y >= 0 && mouse.y < map.height
                 ) {
-                    map.tiles[mouse.y][mouse.x] = (function() {
+                    map.tiles[mouse.y][mouse.x] = (() => {
                         switch (click_action) {
                             case "add_wall":
+                                if (map.tiles[mouse.y][mouse.x] == "goal") return "goal";
+                                if (map.tiles[mouse.y][mouse.x] == "player") return "player";
                                 return "wall";
                             case "add_trap":
+                                // priority: up, down, right, left
+                                if (map.tiles[mouse.y + 1][mouse.x] == "wall") {
+                                    return "u-trap";
+                                }
+                                if (map.tiles[mouse.y - 1][mouse.x] == "wall") {
+                                    return "d-trap";
+                                }
+                                if (map.tiles[mouse.y][mouse.x + 1] == "wall") {
+                                    return "r-trap";
+                                }
+                                if (map.tiles[mouse.y][mouse.x - 1] == "wall") {
+                                    return "l-trap";
+                                }
                                 return "u-trap";
+                            case "add_coin":
+                                return "coin";
+                            case "add_goal":
+                                document.getElementById("add_wall").click();
+                                return "goal";
+                            case "add_player":
+                                document.getElementById("add_wall").click();
+                                return "player";
                             case "remove":
                                 return null;
                             default:
                                 return "wall";
                         }
                     })();
+                    
+                    document.getElementById("add_player").disabled = map_has("player");
+                    document.getElementById("add_goal").disabled   = map_has("goal");
+                    
+                    test_level_playable();
                 }
             }
             
-            document.getElementById("export").addEventListener("click", function() {
-                alert("look in the console.");
-                var lines = map.tiles.map(l => {
+            function convert_level_to_code() {
+                return map.tiles.map(l => {
                     return l.map(t => {
-                        switch(t) {
+                        switch (t) {
                             case null:
                                 return " ";
                             case "wall":
                                 return "#";
                             case "u-trap":
                                 return "^";
+                            case "d-trap":
+                                return "V";
+                            case "l-trap":
+                                return ">";
+                            case "r-trap":
+                                return "<";
+                            case "coin":
+                                return "o";
+                            case "goal":
+                                return "$";
+                            case "player":
+                                return "@";
                         }
                     }).join("");
                 });
-                console.log("[\"" + lines.join("\",\n\"") + "\"]");
+            }
+            
+            document.getElementById("export").addEventListener("click", function() {
+                // alert("look in the console.");
+                
+                var lines = convert_level_to_code();
+                
+                // console.log("[\"" + lines.join("\",\n\"") + "\"]");
+                
+                function create_element(tag, cl) {
+                    var elt       = document.createElement(tag);
+                    elt.className = cl;
+                    return elt;
+                }
+                
+                var export_dialog = create_element("div", "export-dialog");
+                
+                var export_text       = create_element("div", "export-text");
+                export_text.innerHTML = "[\"" + lines.join("\",\n\"") + "\"]";
+                
+                var close_button       = create_element("button", "close");
+                close_button.innerHTML = "close";
+                close_button.addEventListener("click", function() {
+                    document.body.removeChild(export_dialog);
+                });
+                
+                export_dialog.appendChild(export_text);
+                export_dialog.appendChild(close_button);
+                
+                document.body.appendChild(export_dialog);
             });
+            
+            // testing level mechanism
+            var child_window = null;
+            
+            function map_has(tile) {
+                return map.tiles.some(l => {
+                    return l.some(t => {
+                        return t == tile;
+                    });
+                });
+            }
+            
+            function test_level_playable() {
+                document.getElementById("test_level").disabled = !(map_has("player") && map_has("goal"));
+            }
+            
+            // i still have no idea how these work.
+            function post_delayed(child_window, message) {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        child_window.postMessage(message, "*");
+                        resolve("message posted to child window.");
+                    }, 2000);
+                });
+            }
+            
+            async function call_async(action, params) {
+                console.log("waiting...");
+                console.log(await action.apply(null, params));
+            }
+            
+            document.getElementById("test_level").addEventListener("click", () => {
+                var grid     = convert_level_to_code();
+                child_window = window.open("test_level.html", "Popup", "width=552,height=552,top=30,left=30");
+                call_async(post_delayed, [child_window, grid]);
+            });
+            
+            test_level_playable();
             
             requestAnimationFrame(animate);
         </script>

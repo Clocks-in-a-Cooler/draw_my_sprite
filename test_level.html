@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            html, body {
+                position: absolute;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                padding: 0; border: 0; margin: 0;
+                overflow: hidden;
+            }
+            
+            canvas {
+                margin: 0; border: 0; padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="game-display"></canvas>
+        <script src="objects.js"></script>
+        <script src="sprites.js"></script>
+        <script>
+            // the goal: recreate the entire game...again... but without the drawing. use the debug sprites instead
+            var sprites = {
+                // reset the sprites the other scripts might set
+                // for debugging only, so I don't have to redraw the same sprites a whole lotta times
+                "wall": create_sprite("debug/wall.png"),
+                "coin": create_sprite("debug/coin.png"),
+                "goal": create_sprite("debug/goal.png"),
+                "trap": create_sprite("debug/trap.png"),
+                "player": create_sprite("debug/player.png"),
+            };
+            
+            var current_level = null;
+            var last_time = null, lapse = 0;
+            function cycle(time) {
+                if (last_time == null) {
+                    lapse = 0;
+                } else {
+                    lapse = time - last_time;
+                }
+                last_time = time;
+                
+                current_level.update(lapse);
+                viewport.update();
+                viewport.draw();
+                
+                requestAnimationFrame(cycle);
+            }
+            
+            var canvas   = document.querySelector("canvas");
+            canvas.width = 550, canvas.height = 550;
+            var context  = canvas.getContext("2d");
+            
+            window.addEventListener("message", (event) => {
+                console.log("received a custom level.");
+                current_level = new Level(event.data);
+                requestAnimationFrame(cycle);
+            });
+            
+            // register the event handlers
+            var keys = {
+                up: false,
+                down: false,
+                left: false,
+                right: false,
+            };
+            
+            addEventListener("keydown", (evt) => {
+                switch (evt.keyCode) {
+                    case 38:
+                        keys.up = true;
+                        break;
+                    case 40:
+                        keys.down = true;
+                        break;
+                    case 37:
+                        keys.left = true;
+                        break;
+                    case 39:
+                        keys.right = true;
+                        break;
+                }
+            });
+            
+            addEventListener("keyup", (evt) => {
+                switch (evt.keyCode) {
+                    case 38:
+                        keys.up = false;
+                        break;
+                    case 40:
+                        keys.down = false;
+                        break;
+                    case 37:
+                        keys.left = false;
+                        break;
+                    case 39:
+                        keys.right = false;
+                        break;
+                }
+            });
+        </script>
+    </body>
+</html>
