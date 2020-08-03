@@ -208,6 +208,56 @@
                 clicking = false;
             });
             
+            // wasd or arrow keys to scroll
+            var keys = {
+                "up": false,
+                "down": false,
+                "left": false,
+                "right": false,
+            };
+            
+            addEventListener("keydown", (evt) => {
+                switch (evt.keyCode) {
+                    case 38:
+                    case 87:
+                        keys.up = true;
+                        break;
+                    case 40:
+                    case 83:
+                        keys.down = true;
+                        break;
+                    case 37:
+                    case 65:
+                        keys.left = true;
+                        break;
+                    case 39:
+                    case 68:
+                        keys.right = true;
+                        break;
+                }
+            });
+            
+            addEventListener("keyup", (evt) => {
+                switch (evt.keyCode) {
+                    case 38:
+                    case 87:
+                        keys.up = false;
+                        break;
+                    case 40:
+                    case 83:
+                        keys.down = false;
+                        break;
+                    case 37:
+                    case 65:
+                        keys.left = false;
+                        break;
+                    case 39:
+                    case 68:
+                        keys.right = false;
+                        break;
+                }
+            });
+            
             // colours!
             var wall_colour   = "white";
             var trap_colour   = "indianred";
@@ -223,28 +273,18 @@
                 width: canvas.width / this.scale, height: canvas.height / this.scale,
                 
                 update: function() {
-                    var left_margin = this.left + this.width * 0.1, right_margin  = this.left + this.width * 0.9;
-                    var top_margin  = this.top + this.height * 0.1, bottom_margin = this.top + this.height * 0.9;
-                    
-                    var mouse = {
-                        x: mouse_pos.x / this.scale + this.left,
-                        y: mouse_pos.y / this.scale + this.top,
-                    };
-                    
-                    var scrolling_factor = 0.0005;
-                    
-                    if (mouse.x < left_margin) {
-                        this.left += (left_margin - mouse_pos.x) * scrolling_factor * 10;
+                    var scrolling_factor = 0.5;
+                    if (keys.up) {
+                        this.top -= scrolling_factor;
                     }
-                    if (mouse.x > right_margin) {
-                        this.left += (mouse_pos.x - right_margin) * scrolling_factor;
+                    if (keys.down) {
+                        this.top += scrolling_factor;
                     }
-                    
-                    if (mouse.y < top_margin) {
-                        this.top += (top_margin - mouse_pos.y) * scrolling_factor * 10;
+                    if (keys.left) {
+                        this.left -= scrolling_factor;
                     }
-                    if (mouse.y > bottom_margin) {
-                        this.top += (mouse_pos.y - bottom_margin) * scrolling_factor;
+                    if (keys.right) {
+                        this.left += scrolling_factor;
                     }
                     
                     this.left = Math.min(map.width - this.width, Math.max(this.left, 0));
@@ -254,13 +294,6 @@
                 draw: function() {
                     // clear the screen first
                     context.clearRect(0, 0, 550, 550);
-                    
-                    /*
-                    var start_x = Math.max(Math.min(map.width, Math.floor(this.left)), 0);
-                    var end_x   = Math.max(Math.min(map.width, Math.ceil(this.left + this.width)), 0);
-                    var start_y = Math.max(Math.min(map.height, Math.floor(this.top)), 0);
-                    var end_y   = Math.max(Math.min(map.height, Math.ceil(this.top + this.height)), 0);
-                    */
                     
                     var start_x = Math.floor(this.left);
                     var end_x   = Math.ceil(this.left + this.width);

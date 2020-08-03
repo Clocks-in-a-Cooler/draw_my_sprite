@@ -22,4 +22,6 @@ To run, open index.html. Then type `debug()` into the Javascript console.
 
 - [x] collision detection between the player and the walls
 
-- [ ] collision detection between the player and the coins and the goal
+- [x] collision detection between the player and the coins and the goal
+
+- [ ] intro and story?

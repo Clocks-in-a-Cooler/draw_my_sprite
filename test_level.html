@@ -52,9 +52,12 @@
             canvas.width = 550, canvas.height = 550;
             var context  = canvas.getContext("2d");
             
+            var test_level;
+            
             window.addEventListener("message", (event) => {
                 console.log("received a custom level.");
-                current_level = new Level(event.data);
+                test_level    = event.data;
+                current_level = new Level(test_level);
                 requestAnimationFrame(cycle);
             });
             

@@ -78,7 +78,8 @@ Level.prototype.get_obstacle = function(pos, size) {
         return "wall";
     }
     if (bottom > this.height) {
-        return "u-trap";
+        this.lose();
+        return null;
     }
     
     for (var y = top; y < bottom; y++) {
