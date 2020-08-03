@@ -20,11 +20,6 @@ Vector.prototype.times = function(factor) {
 var tile_key = {
     "#": "wall",
     " ": null, // blank tile
-    // traps facing various directions
-    "^": "u-trap",
-    "V": "d-trap",
-    "<": "l-trap",
-    ">": "r-trap",
 }
 
 // the dynamic parts of the level
@@ -32,13 +27,15 @@ var actor_key = {
     "@": Player, //"player",
     "$": Goal, //"goal",
     "o": Coin, //"coin",
+    "^": Trap, //trap facing up
+    "V": Trap, //trap facing down
+    "<": Trap, //trap facing left
+    ">": Trap, //trap facing right
 }
 
 function Level(plan) {
     this.width  = plan[0].length;
     this.height = plan.length;
-    
-    this.coin_count = 0;
     
     this.background_colour = "white";
     
@@ -50,13 +47,9 @@ function Level(plan) {
         for (var x = 0; x < line.length; x++) {
             var character = line[x], tile_type = null;
             
-            if (character == "o") {
-                this.coin_count++;
-            }
-            
             var Actor = actor_key[character];
             if (Actor) {
-                this.actors.push(new Actor(new Vector(x, y)));
+                this.actors.push(new Actor(new Vector(x, y), character));
             } else {
                 tile_type = tile_key[character];
             }
@@ -151,6 +144,19 @@ Level.prototype.touched = function(obj) {
     }
 };
 
+Level.prototype.has_coins = function() {
+    return this.actors.some(a => { return a.type == "coin"; })
+};
+
+Level.prototype.lose = function() {
+    if (!this.status) {
+        // you lose!
+        this.status            = "lost";
+        this.finish_delay      = 2000;
+        this.background_colour = this.lose_colour;
+    }
+}
+
 // prize to whoever can figure out what this does
 function Player(pos) {
     this.pos    = pos.plus(new Vector(0, -1));
@@ -215,6 +221,44 @@ Player.prototype.update = function(lapse, level) {
     this.move_y(lapse, level);
 };
 
+// it's a trap!
+function Trap(pos, char) {
+    switch (char) {
+        case "^":
+            this.pos  = pos.plus(new Vector(0, 0.5));
+            this.size = new Vector(1, 0.5);
+            this.rot  = "up";
+            break;
+        case "V":
+            this.pos  = pos;
+            this.size = new Vector(1, 0.5);
+            this.rot  = "down";
+            break;
+        case "<":
+            this.pos  = pos.plus(new Vector(0.5, 0));
+            this.size = new Vector(0.5, 1);
+            this.rot  = "left";
+            break;
+        case ">":
+            this.pos  = pos;
+            this.size = new Vector(0.5, 1);
+            this.rot  = "right";
+            break;
+    }
+    
+    this.active = true;
+    this.type   = "trap";
+}
+
+Trap.prototype.update = function(lapse) {
+    // do nothing
+    return;
+};
+
+Trap.prototype.collision = function(level) {
+    level.lose();
+};
+
 // coins and goals, heart and story of the game...
 function Coin(pos) {
     this.pos    = this.base_pos = pos.plus(new Vector(0.125, 0));
@@ -236,7 +280,6 @@ Coin.prototype.update = function(lapse) {
 
 Coin.prototype.collision = function(level) {
     this.active = false;
-    level.coin_count--;
 };
 
 function Goal(pos) {
@@ -260,12 +303,12 @@ Goal.prototype.update = function(lapse) {
 };
 
 Goal.prototype.collision = function(level) {
-    if (level.coin_count > 0) {
+    if (level.has_coins()) {
         // for now
-        console.log("get all the coins first.");
+        conversation(["get all the coins first."], nothing);
         return;
     }
     
     // advance to the next level
-    console.log("you win");
+    conversation(["you win"], nothing);
 }

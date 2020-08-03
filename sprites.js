@@ -74,8 +74,8 @@ var viewport = {
         // get the actors that are currently in view
         var actors_in_view = current_level.actors.filter((a) => {
             return (
-                a.pos.x >= left && a.pos.x <= right &&
-                a.pos.y >= top  && a.pos.y <= bottom);
+                a.pos.x + a.size.x >= left && a.pos.x <= right &&
+                a.pos.y + a.size.y >= top  && a.pos.y <= bottom);
         });
         
         // make sure we don't accidentally...
@@ -99,30 +99,6 @@ var viewport = {
                     case "wall":
                         display_context.drawImage(sprites.wall, screen_x, screen_y, scale, scale);
                         break;
-                    case "u-trap":
-                        display_context.drawImage(sprites.trap, screen_x, screen_y, scale, scale);
-                        break;
-                    case "d-trap":
-                        display_context.save();
-                        display_context.translate(screen_x, screen_y);
-                        display_context.rotate(Math.PI);
-                        display_context.drawImage(sprites.trap, -scale, -scale, scale, scale);
-                        display_context.restore();
-                        break;
-                    case "l-trap":
-                        display_context.save();
-                        display_context.translate(screen_x, screen_y);
-                        display_context.rotate(3 * Math.PI / 2);
-                        display_context.drawImage(sprites.trap, -scale, 0, scale, scale);
-                        display_context.restore();
-                        break;
-                    case "r-trap":
-                        display_context.save();
-                        display_context.translate(screen_x, screen_y);
-                        display_context.rotate(Math.PI / 2);
-                        display_context.drawImage(sprites.trap, 0, -scale, scale, scale);
-                        display_context.restore();
-                        break;
                 }
             }
         }
@@ -134,7 +110,32 @@ var viewport = {
             if (a.type == "player") { // cue korobeiniki
                 // for later: draw the player's sprite reversed if the player is moving left (motion.x < 0)
             } */
-            display_context.drawImage(sprites[a.type], screen_x, screen_y, a.size.x * scale, a.size.y * scale);
+            // software bloat time!
+            if (a.type == "trap") {
+                display_context.save();
+                display_context.translate(screen_x, screen_y);
+                switch (a.rot) {
+                    case "up":
+                        display_context.drawImage(sprites["trap"], 0, 0, a.size.x * scale, a.size.y * scale);
+                        break;
+                    // for the rest, gotta reorient the context
+                    case "down":
+                        display_context.rotate(Math.PI);
+                        display_context.drawImage(sprites["trap"], -a.size.x * scale, -a.size.y * scale, a.size.x * scale, a.size.y * scale);
+                        break;
+                    case "left":
+                        display_context.rotate(3 * Math.PI / 2);
+                        display_context.drawImage(sprites["trap"], -a.size.y * scale, 0, a.size.y * scale, a.size.x * scale);
+                        break;
+                    case "right":
+                        display_context.rotate(Math.PI / 2);
+                        display_context.drawImage(sprites["trap"], 0, -a.size.x * scale, a.size.y * scale, a.size.x * scale);
+                        break;
+                }
+                display_context.restore();
+            } else {
+                display_context.drawImage(sprites[a.type], screen_x, screen_y, a.size.x * scale, a.size.y * scale);
+            }
         });
     },
 };

@@ -1,6 +1,6 @@
 var test_level =  [
     "     #############################################",
-    "     #                                          <#",
+    "     #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV #",
     "     #                                          <#",
     "     #                                          <#",
     "  $  #                                     oo   <#",

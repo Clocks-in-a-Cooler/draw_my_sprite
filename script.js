@@ -27,3 +27,8 @@ function conversation(messages, after) {
     message.innerHTML = messages[index];
     message.appendChild(continue_button);
 }
+
+function nothing() {
+    // nothing
+    return;
+}
