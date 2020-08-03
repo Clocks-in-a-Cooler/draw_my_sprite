@@ -366,16 +366,16 @@
                                 return "wall";
                             case "add_trap":
                                 // priority: up, down, right, left
-                                if (map.tiles[mouse.y + 1][mouse.x] == "wall") {
+                                if (map.tiles[mouse.y + 1] && map.tiles[mouse.y + 1][mouse.x] == "wall") {
                                     return "u-trap";
                                 }
-                                if (map.tiles[mouse.y - 1][mouse.x] == "wall") {
+                                if (map.tiles[mouse.y - 1] && map.tiles[mouse.y - 1][mouse.x] == "wall") {
                                     return "d-trap";
                                 }
-                                if (map.tiles[mouse.y][mouse.x + 1] == "wall") {
+                                if (map.tiles[mouse.y][mouse.x + 1] && map.tiles[mouse.y][mouse.x + 1] == "wall") {
                                     return "r-trap";
                                 }
-                                if (map.tiles[mouse.y][mouse.x - 1] == "wall") {
+                                if (map.tiles[mouse.y][mouse.x - 1] && map.tiles[mouse.y][mouse.x - 1] == "wall") {
                                     return "l-trap";
                                 }
                                 return "u-trap";
@@ -433,6 +433,8 @@
                 
                 var lines = convert_level_to_code();
                 
+                var level_code = "[\"" + lines.join("\",\n\"") + "\"]";
+                
                 // console.log("[\"" + lines.join("\",\n\"") + "\"]");
                 
                 function create_element(tag, cl) {
@@ -444,7 +446,7 @@
                 var export_dialog = create_element("div", "export-dialog");
                 
                 var export_text       = create_element("div", "export-text");
-                export_text.innerHTML = "[\"" + lines.join("\",\n\"") + "\"]";
+                export_text.innerHTML = level_code.replace(/ /g, "&#160;");
                 
                 var close_button       = create_element("button", "close");
                 close_button.innerHTML = "close";

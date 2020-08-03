@@ -40,6 +40,8 @@ function Level(plan) {
     
     this.coin_count = 0;
     
+    this.background_colour = "white";
+    
     this.grid   = [];
     this.actors = []; // if you've played minecraft you can think of these as entities. then this.grid would be the blocks.
     
@@ -70,6 +72,9 @@ function Level(plan) {
     this.status = this.finish_delay = null;
 }
 
+Level.prototype.lose_colour = "firebrick";
+Level.prototype.win_colour  = "mediumspringgreen";
+
 Level.prototype.get_obstacle = function(pos, size) {
     var left = Math.floor(pos.x), right  = Math.ceil(pos.x + size.x);
     var top  = Math.floor(pos.y), bottom = Math.ceil(pos.y + size.y);
@@ -96,12 +101,12 @@ Level.prototype.get_obstacle = function(pos, size) {
 Level.prototype.get_actor = function(actor) {
     for (var c = 0; c < this.actors.length; c++) {
         var other = this.actors[c];
-        if (other = actor) continue;
+        if (other == actor) continue;
         if (
-            other.pos.x + other.size.x > actor.x &&
-            actor.pos.x + actor.size.x > other.x &&
-            other.pos.y + other.size.y > actor.y &&
-            actor.pos.y + actor.size.y > other.y
+            other.pos.x + other.size.x > actor.pos.x &&
+            actor.pos.x + actor.size.x > other.pos.x &&
+            other.pos.y + other.size.y > actor.pos.y &&
+            actor.pos.y + actor.size.y > other.pos.y
         ) return other;
     }
 };
@@ -110,7 +115,13 @@ var max_lapse = 50; // milliseconds, that is
 
 Level.prototype.update = function(lapse) {
     if (this.status != null) {
-        this.finishDelay -= lapse;
+        this.finish_delay -= lapse;
+        if (this.finish_delay <= 0) {
+            if (this.status == "lost") {
+                // reset
+                current_level = new Level(test_level);
+            }
+        }
     }
     
     while (lapse > 0) {
@@ -124,6 +135,19 @@ Level.prototype.update = function(lapse) {
         });
         
         lapse -= step;
+    }
+};
+
+Level.prototype.touched = function(obj) {
+    switch (obj) {
+        case "u-trap":
+        case "d-trap":
+        case "l-trap":
+        case "r-trap":
+            // you lose!
+            this.status            = "lost";
+            this.finish_delay      = 2000;
+            this.background_colour = this.lose_colour;
     }
 };
 
@@ -146,11 +170,19 @@ Player.prototype.move_x = function(lapse, level) {
     this.motion.x = ((keys.left ? -1 : 0) + (keys.right ? 1 : 0)) * this.speed;
     var new_pos   = this.pos.plus(new Vector(this.motion.x * lapse, 0));
     
-    if (level.get_obstacle(new_pos, this.size)) {
+    var obstacle = level.get_obstacle(new_pos, this.size);
+    if (obstacle) {
         // cancel the motion
         this.motion.x = 0;
+        level.touched(obstacle);
     } else {
         this.pos = new_pos;
+    }
+    
+    var actor = level.get_actor(this);
+    if (actor) {
+        // player has touched a coin or the goal
+        actor.collision(level);
     }
 };
 
@@ -158,15 +190,23 @@ Player.prototype.move_y = function(lapse, level) {
     this.motion.y += this.gravity * lapse;
     var new_pos    = this.pos.plus(new Vector(0, this.motion.y * lapse));
     
-    if (level.get_obstacle(new_pos, this.size)) {
+    var obstacle = level.get_obstacle(new_pos, this.size);
+    if (obstacle) {
         // cancel the motion, check for jumping
         if (this.motion.y > 0 && keys.up) {
             this.motion.y = -this.jump;
         } else {
             this.motion.y = 0;
         }
+        level.touched(obstacle);
     } else {
         this.pos = new_pos;
+    }
+    
+    var actor = level.get_actor(this);
+    if (actor) {
+        // player has touched a coin or the goal
+        actor.collision(level);
     }
 };
 
@@ -227,4 +267,5 @@ Goal.prototype.collision = function(level) {
     }
     
     // advance to the next level
+    console.log("you win");
 }

@@ -1,17 +1,17 @@
 // actually makes the game run, handles fizzix and stuff
 
-var paused = true;
+var paused = false;
 
 function start_game() {
     
 }
 
 function pause_game() {
-    
+    paused = true;
 }
 
 function resume_game() {
-    
+    paused = false;
 }
 
 var last_time = null;
@@ -24,7 +24,7 @@ function cycle(time) {
     }
     last_time = time;
     
-    current_level.update(lapse);
+    if (!paused) current_level.update(lapse);
     
     viewport.update();
     viewport.draw();

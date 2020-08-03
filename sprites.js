@@ -36,7 +36,7 @@ display.width = 550; display.height = 550;
 var scale                 = 30;
 var sprite_scaling_factor = 3 / 20; // not sure if this will actually be used
 
-var background_colour = "powderblue"; // trusty old colour
+var background_colour = "white"; // trusty old colour
 
 var viewport = {
     width: display.width / scale,
@@ -83,7 +83,7 @@ var viewport = {
         top  = Math.max(top, 0), bottom = Math.max(current_level.height, bottom);
         
         // draw the background colour -- DUH
-        display_context.fillStyle = background_colour;
+        display_context.fillStyle = current_level.background_colour;
         display_context.fillRect(0, 0, display.width, display.height);
         
         // draw the static stuff -- walls, traps, blank spaces
