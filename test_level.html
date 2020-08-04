@@ -31,6 +31,8 @@
                 "player": create_sprite("debug/player.png"),
             };
             
+            sprites_drawn.set_all(true);
+            
             var current_level = null;
             var last_time = null, lapse = 0;
             function cycle(time) {
@@ -52,12 +54,12 @@
             canvas.width = 550, canvas.height = 550;
             var context  = canvas.getContext("2d");
             
-            var test_level;
+            var GAME_LEVELS = [], progress = 0;
             
             window.addEventListener("message", (event) => {
                 console.log("received a custom level.");
-                test_level    = event.data;
-                current_level = new Level(test_level);
+                GAME_LEVELS[0] = event.data;
+                current_level  = new Level(GAME_LEVELS[0]);
                 requestAnimationFrame(cycle);
             });
             

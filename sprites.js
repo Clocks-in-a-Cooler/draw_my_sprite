@@ -4,7 +4,7 @@ function create_sprite(url) {
     
     return elt;
 }
-/*
+
 var sprites = {
     // to be drawn by the player
     // remember that all of the drawn sprites must be scaled down
@@ -14,8 +14,8 @@ var sprites = {
     "goal": create_sprite("blank.png"),
     "trap": create_sprite("blank.png"),
     "player": create_sprite("blank.png"),
-}; */
-
+};
+/*
 var sprites = {
     // for debugging only, so I don't have to redraw the same sprites a whole lotta times
     // remember that all of the drawn sprites must be scaled down
@@ -25,7 +25,7 @@ var sprites = {
     "goal": create_sprite("debug/goal.png"),
     "trap": create_sprite("debug/trap.png"),
     "player": create_sprite("debug/player.png"),
-};
+};*/
 
 // drawing on the game canvas
 var display         = document.getElementById("game-display");

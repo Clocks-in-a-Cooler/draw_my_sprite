@@ -140,6 +140,11 @@ Level.prototype.update = function(lapse) {
         
         lapse -= step;
     }
+    
+    if (!this.has_coins() && !sprites_drawn["goal"]) {
+        pause_game();
+        draw_goal_sprite();
+    }
 };
 
 Level.prototype.touched = function(obj) {
@@ -248,6 +253,16 @@ Player.prototype.move_y = function(lapse, level) {
 };
 
 Player.prototype.update = function(lapse, level) {
+    if (!sprites_drawn["player"]) {
+        pause_game();
+        draw_player_sprite();
+    }
+    
+    if (sprites_drawn["player"] && !sprites_drawn["wall"]) {
+        pause_game();
+        draw_wall_sprite();
+    }
+    
     this.move_x(lapse, level);
     this.move_y(lapse, level);
 };
@@ -287,6 +302,10 @@ Trap.prototype.update = function(lapse) {
 };
 
 Trap.prototype.collision = function(level) {
+    if (!sprites_drawn["trap"]) {
+        pause_game();
+        draw_trap_sprite();
+    }
     level.lose();
 };
 
@@ -312,6 +331,10 @@ Coin.prototype.update = function(lapse) {
 Coin.prototype.collision = function(level) {
     play_coin_pickup_sound();
     this.active = false;
+    if (!sprites_drawn["coin"]) {
+        pause_game();
+        draw_coin_sprite();
+    }
 };
 
 function Goal(pos) {
