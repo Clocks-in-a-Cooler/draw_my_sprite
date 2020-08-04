@@ -106,12 +106,19 @@ var viewport = {
         // draw the dynamic stuff -- player, coins, goal
         actors_in_view.forEach(a => {
             var screen_x = (a.pos.x - this.x) * scale, screen_y = (a.pos.y - this.y) * scale;
-            /*
+            
             if (a.type == "player") { // cue korobeiniki
                 // for later: draw the player's sprite reversed if the player is moving left (motion.x < 0)
-            } */
-            // software bloat time!
-            if (a.type == "trap") {
+                if (a.facing == "left") {
+                    display_context.save();
+                    display_context.translate(screen_x, screen_y);
+                    display_context.scale(-1, 1);
+                    display_context.drawImage(sprites["player"], -a.size.x * scale, 0, a.size.x * scale, a.size.y * scale);
+                    display_context.restore();
+                } else {
+                    display_context.drawImage(sprites["player"], screen_x, screen_y, a.size.x * scale, a.size.y * scale);
+                }
+            } else if (a.type == "trap") {
                 display_context.save();
                 display_context.translate(screen_x, screen_y);
                 switch (a.rot) {

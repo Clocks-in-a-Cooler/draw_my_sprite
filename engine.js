@@ -2,8 +2,11 @@
 
 var paused = false;
 
+var progress = 0;
+
 function start_game() {
-    
+    current_level = new Level(GAME_LEVELS[progress]);
+    requestAnimationFrame(cycle);
 }
 
 function pause_game() {
@@ -95,4 +98,24 @@ function debug() {
     init();
     current_level = new Level(test_level);
     requestAnimationFrame(cycle);
+}
+
+function play_coin_pickup_sound() {
+    zzfx(1,.01,1147,0,.03,.23,1,.5,0,0,634,.03,0,0,0,0,0,.71,.07);
+}
+
+function play_die_sound() {
+    zzfx(1,.05,349,0,.08,.45,0,.5,0,-6.9,0,0,0,.2,.7,.1,.1,.88,.09);
+}
+
+function play_next_level_sound() {
+    zzfx(.4,.05,3,.1,0,.07,1,0,0,35,0,0,0,0,0,0,0,.4,.13);
+}
+
+function play_win_sound() {
+    zzfx(1,.05,331,.22,.09,.24,1,1.58,6.9,0,-196,.01,.11,0,.2,0,.13,.84,.07);
+}
+
+function play_jump_sound() {
+    zzfx(1,.05,314,0,.07,.13,0,.64,0,4.9,0,0,0,0,0,.1,.05,.96,.03);
 }

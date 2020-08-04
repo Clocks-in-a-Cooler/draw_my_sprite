@@ -25,3 +25,7 @@ To run, open index.html. Then type `debug()` into the Javascript console.
 - [x] collision detection between the player and the coins and the goal
 
 - [ ] intro and story?
+
+## Credits
+
+- ZzFX, by Frank Force, for the sounds

@@ -82,6 +82,8 @@ button.selected {
     transition: background-color .5s, color .5s;
 }
 
-.continue-conversation {
-    
+button:hover {
+    color: white;
+    background-color: black;
+    transition: background-color .5s, color .5s;
 }

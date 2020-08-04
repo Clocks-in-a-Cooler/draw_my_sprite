@@ -113,7 +113,17 @@ Level.prototype.update = function(lapse) {
         if (this.finish_delay <= 0) {
             if (this.status == "lost") {
                 // reset
-                current_level = new Level(test_level);
+                load_level(GAME_LEVELS[progress]);
+            } else if (this.status == "won") {
+                // advance to the next level
+                progress++;
+                if (GAME_LEVELS[progress]) {
+                    load_level(GAME_LEVELS[progress]);
+                } else {
+                    conversation(["you've beat the game! Congrats!"], nothing);
+                    pause_game();
+                    play_win_sound();
+                }
             }
         }
     }
@@ -155,6 +165,17 @@ Level.prototype.lose = function() {
         this.status            = "lost";
         this.finish_delay      = 2000;
         this.background_colour = this.lose_colour;
+        play_die_sound();
+    }
+}
+
+Level.prototype.win = function() {
+    if (!this.status) {
+        // you win!
+        this.status = "won";
+        this.finish_delay = 2000;
+        this.background_colour = this.win_colour;
+        play_next_level_sound();
     }
 }
 
@@ -164,6 +185,7 @@ function Player(pos) {
     this.size   = new Vector(0.8, 1.8);
     this.motion = new Vector(0, 0);
     this.active = true;
+    this.facing = "right";
 }
 
 Player.prototype.type = "player";
@@ -176,6 +198,13 @@ Player.prototype.jump    = 0.017;
 Player.prototype.move_x = function(lapse, level) {
     this.motion.x = ((keys.left ? -1 : 0) + (keys.right ? 1 : 0)) * this.speed;
     var new_pos   = this.pos.plus(new Vector(this.motion.x * lapse, 0));
+    
+    if (this.motion.x > 0) {
+        this.facing = "right";
+    }
+    if (this.motion.x < 0) {
+        this.facing = "left";
+    }
     
     var obstacle = level.get_obstacle(new_pos, this.size);
     if (obstacle) {
@@ -202,6 +231,7 @@ Player.prototype.move_y = function(lapse, level) {
         // cancel the motion, check for jumping
         if (this.motion.y > 0 && keys.up) {
             this.motion.y = -this.jump;
+            play_jump_sound();
         } else {
             this.motion.y = 0;
         }
@@ -280,6 +310,7 @@ Coin.prototype.update = function(lapse) {
 };
 
 Coin.prototype.collision = function(level) {
+    play_coin_pickup_sound();
     this.active = false;
 };
 
@@ -310,6 +341,6 @@ Goal.prototype.collision = function(level) {
         return;
     }
     
-    // advance to the next level
-    conversation(["you win"], nothing);
+    // win the level
+    level.win();
 }

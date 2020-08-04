@@ -105,3 +105,15 @@ eraser_button.addEventListener("click", () => {
 });
 
 pencil_button.click();
+
+var sprites_drawn = {
+    "player": false,
+    "wall": false,
+    "coin": false,
+    "trap": false,
+    "goal": false,
+    
+    set_all: function(drawn) {
+        this.player = this.wall = this.coin = this.trap = this.goal = drawn;
+    },
+}
